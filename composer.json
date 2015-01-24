@@ -1,0 +1,23 @@
+{
+    "name": "prettus/repository",
+    "description": "Base Repositories to Laravel Projetcs",
+    "authors": [
+        {
+            "name": "Anderson Andrade",
+            "email": "contato@andersonandra.de"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Prettus\\Repository\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
