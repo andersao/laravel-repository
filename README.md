@@ -4,7 +4,7 @@
 
 Edit your project's composer.json file to require prettus/repository.
  
-    "prettus/repository": "dev-master"
+    "prettus/laravel-repository": "dev-master"
 
 Execute comp
 
