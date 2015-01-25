@@ -1,6 +1,8 @@
 {
     "name": "prettus/laravel-repository",
     "description": "Repositories to abstract the database layer",
+    "license": "MIT",
+    "keywords": ["laravel", "repository", "eloquent", "model"],
     "authors": [
         {
             "name": "Anderson Andrade",
