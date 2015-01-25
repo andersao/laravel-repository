@@ -1,6 +1,6 @@
 {
-    "name": "prettus/repository",
-    "description": "Base Repositories to Laravel Projetcs",
+    "name": "prettus/laravel-repository",
+    "description": "Repositories to abstract the database layer",
     "authors": [
         {
             "name": "Anderson Andrade",
@@ -9,7 +9,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "illuminate/support": "4.2.*"
+        "illuminate/support": "4.2.*",
+        "prettus/laravel-validation": "dev-master"
     },
     "autoload": {
         "classmap": [
