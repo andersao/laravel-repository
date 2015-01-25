@@ -18,7 +18,7 @@ class RepositoryServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('prettus/repository');
+		$this->package('prettus/repository','prettus-repository', dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR );
 	}
 
 	/**

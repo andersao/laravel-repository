@@ -1,18 +1,27 @@
 # Laravel Repositories
 
-## Installation
+[![Total Downloads](https://poser.pugx.org/prettus/laravel-repository/downloads.svg)](https://packagist.org/packages/prettus/laravel-repository)
+[![Latest Stable Version](https://poser.pugx.org/prettus/laravel-repository/v/stable.svg)](https://packagist.org/packages/prettus/laravel-repository)
+[![Latest Unstable Version](https://poser.pugx.org/prettus/laravel-repository/v/unstable.svg)](https://packagist.org/packages/prettus/laravel-repository)
+[![License](https://poser.pugx.org/prettus/laravel-repository/license.svg)](https://packagist.org/packages/prettus/laravel-repository)
 
-Edit your project's composer.json file to require prettus/repository.
+Laravel Repositories é utilizados para abstrair a camadas de banco de dados, tornando a aplicação mais flexivel e de fácil manutenção.
+
+## Instalação
+
+Edite o seu arquivo composer.json e adicione "prettus/laravel-repository": "dev-master" nas dependencias.
  
-    "prettus/laravel-repository": "dev-master"
+    "require": {
+        "prettus/laravel-repository": "dev-master"
+    }
 
-Execute comp
+Execute o comando composer update para atualizar as dependencias do seu projeto
 
-Open app/config/app.php, and add a new item to the providers array.
+Abra o arquivo app/config/app.php e adicione o provider abaixo
 
     'Prettus\Repository\RepositoryServiceProvider',
 
-## Repository methods
+## Metódos do repositório
 
 ### RepositoryInterface
 
@@ -35,9 +44,15 @@ Open app/config/app.php, and add a new item to the providers array.
 - orderByAsc($field);
 - orderByDesc($field);
 
-## Creating a Validator
+### RepositoryRequestFilterableInterface
 
-See https://github.com/andersao/laravel-validator
+- requestFilter(Request $request = null);
+
+## Utilizando o Repositório
+
+### Criar um Validator ( Opcional )
+
+Veja mais detalhes em https://github.com/andersao/laravel-validator
 
     <?php
     
@@ -53,7 +68,7 @@ See https://github.com/andersao/laravel-validator
     
     }
 
-## Creating a repository
+### Criar um repositório
 
     <?php
     
@@ -68,7 +83,7 @@ See https://github.com/andersao/laravel-validator
         
     }
     
-## Using the repository
+### Usando o repositório em um controller
 
     <?php
     
@@ -159,3 +174,39 @@ See https://github.com/andersao/laravel-validator
     
         }
     }
+    
+## Filtro no repositório
+
+A interface RepositoryRequestFilterableInterface prove o metódo requestFilter(), esse metódo aplica um filtro no repositório
+a partir de parâmetros enviados na requisição. Dessa forma é possível realizar busca e ordenar resultados somente passando dados
+por parâmetros.
+
+As parâmetros aceitos são:
+
+- search ( Valor a ser buscado nos campos definidos no repositorio )
+- searchFields ( Campos a serem buscados nessa requisição )
+- filter ( Campos retornados )
+- orderBy
+- sortedBy 
+
+Exemplo de utilização:
+
+- ?search=Lorem&orderBy=nome
+- ?search=Lorem&searchFields=nome:like;email:=
+- ?filter=nome,email
+
+### Aplicando o filtro da requisição
+
+    public function index()
+    {
+        $posts = $this->repository->requestFilter()->all();
+    
+        return Response::json(array(
+            'data'   =>$posts
+        ));
+    }
+    
+    
+# Autor
+
+Anderson Andrade - <contato@andersonandra.de>
