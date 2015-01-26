@@ -302,7 +302,11 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
         }
 
         if( $filter && !empty($filter) ){
-            $filter = is_array($filter) ? $filter : array($filter);
+
+            if( is_string($filter) ){
+                $filter = explode(';', $filter);
+            }
+
             $this->query = $this->query->select($filter);
         }
 
