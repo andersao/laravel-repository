@@ -12,7 +12,7 @@ Laravel Repositories é utilizados para abstrair a camadas de banco de dados, to
 Edite o seu arquivo composer.json e adicione "prettus/laravel-repository": "dev-master" nas dependencias.
  
     "require": {
-        "prettus/laravel-repository": "dev-master"
+        "prettus/laravel-repository": "1.0.*"
     }
 
 Execute o comando composer update para atualizar as dependencias do seu projeto
