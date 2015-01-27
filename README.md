@@ -9,7 +9,7 @@ Laravel Repositories is used to abstract the data layer, making our application 
 
 ## Installation
 
-Add in this line "prettus/laravel-repository": "dev-master" in your composer.json.
+Add this line "prettus/laravel-repository": "dev-master" in your composer.json.
  
     "require": {
         "prettus/laravel-repository": "1.0.*"
