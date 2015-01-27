@@ -5,23 +5,23 @@
 [![Latest Unstable Version](https://poser.pugx.org/prettus/laravel-repository/v/unstable.svg)](https://packagist.org/packages/prettus/laravel-repository)
 [![License](https://poser.pugx.org/prettus/laravel-repository/license.svg)](https://packagist.org/packages/prettus/laravel-repository)
 
-Laravel Repositories é utilizados para abstrair a camadas de banco de dados, tornando a aplicação mais flexivel e de fácil manutenção.
+Laravel Repositories is used to abstract the data layer, making our application more flexible to maintain.
 
-## Instalação
+## Installation
 
-Edite o seu arquivo composer.json e adicione "prettus/laravel-repository": "dev-master" nas dependencias.
+Add this line "prettus/laravel-repository": "dev-master" in your composer.json.
  
     "require": {
         "prettus/laravel-repository": "1.0.*"
     }
 
-Execute o comando composer update para atualizar as dependencias do seu projeto
+Issue composer update
 
-Abra o arquivo app/config/app.php e adicione o provider abaixo
+Add to app/config/app.php service provider array:
 
     'Prettus\Repository\RepositoryServiceProvider',
 
-## Metódos do repositório
+## Methods
 
 ### RepositoryInterface
 
@@ -48,11 +48,11 @@ Abra o arquivo app/config/app.php e adicione o provider abaixo
 
 - requestFilter(Request $request = null);
 
-## Utilizando o Repositório
+## Utilisation
 
-### Criar um Validator ( Opcional )
+### Create a validator class ( Optional )
 
-Veja mais detalhes em https://github.com/andersao/laravel-validator
+For more details: https://github.com/andersao/laravel-validator
 
     <?php
     
@@ -68,7 +68,7 @@ Veja mais detalhes em https://github.com/andersao/laravel-validator
     
     }
 
-### Criar um repositório
+### Create a Repository
 
     <?php
     
@@ -83,7 +83,7 @@ Veja mais detalhes em https://github.com/andersao/laravel-validator
         
     }
     
-### Usando o repositório em um controller
+### Using the Repository in a Controller
 
     <?php
     
@@ -175,27 +175,25 @@ Veja mais detalhes em https://github.com/andersao/laravel-validator
         }
     }
     
-## Filtro no repositório
+## Filters
 
-A interface RepositoryRequestFilterableInterface prove o metódo requestFilter(), esse metódo aplica um filtro no repositório
-a partir de parâmetros enviados na requisição. Dessa forma é possível realizar busca e ordenar resultados somente passando dados
-por parâmetros.
+The RepositoryRequestFilterableInterface interface comes with the method requestFilter(Request params). 
 
-As parâmetros aceitos são:
+The default parameters are:
 
-- search ( Valor a ser buscado nos campos definidos no repositorio )
-- searchFields ( Campos a serem buscados nessa requisição )
-- filter ( Campos retornados )
+- search ( Value to be searched by the repository )
+- searchFields ( Fields to be searched in )
+- filter ( Returned fields? )
 - orderBy
 - sortedBy 
 
 Exemplo de utilização:
 
-- ?search=Lorem&orderBy=nome
-- ?search=Lorem&searchFields=nome:like;email:=
-- ?filter=nome,email
+- ?search=Lorem&orderBy=name
+- ?search=Lorem&searchFields=name:like;email:=
+- ?filter=name,email
 
-### Aplicando o filtro da requisição
+### Applying a filter
 
     public function index()
     {
@@ -207,6 +205,6 @@ Exemplo de utilização:
     }
     
     
-# Autor
+# Author
 
 Anderson Andrade - <contato@andersonandra.de>
