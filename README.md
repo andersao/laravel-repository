@@ -183,7 +183,7 @@ The default parameters are:
 
 - search ( Value to be searched by the repository )
 - searchFields ( Fields to be searched in )
-- filter ( Fields returned? )
+- filter ( Returned fields? )
 - orderBy
 - sortedBy 
 
