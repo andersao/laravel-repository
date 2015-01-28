@@ -10,17 +10,20 @@ Laravel Repositories is used to abstract the data layer, making our application 
 ## Installation
 
 Add this line "prettus/laravel-repository": "1.0.*" in your composer.json.
- 
-    "require": {
-        "prettus/laravel-repository": "1.0.*"
-    }
+
+```json
+"require": {
+    "prettus/laravel-repository": "1.0.*"
+}
+```
 
 Issue composer update
 
 Add to app/config/app.php service provider array:
 
+```
     'Prettus\Repository\RepositoryServiceProvider',
-
+```
 ## Methods
 
 ### RepositoryInterface
@@ -54,127 +57,128 @@ Add to app/config/app.php service provider array:
 
 For more details: https://github.com/andersao/laravel-validator
 
-    <?php
-    
-    use \Prettus\Validator\LaravelValidator;
-    
-    class PostValidator extends LaravelValidator {
-    
-        protected $rules = [
-            'title' => 'required',
-            'text'  => 'min:3',
-            'author'=> 'required'
-        ];
-    
-    }
+```php
+use \Prettus\Validator\LaravelValidator;
+
+class PostValidator extends LaravelValidator {
+
+    protected $rules = [
+        'title' => 'required',
+        'text'  => 'min:3',
+        'author'=> 'required'
+    ];
+
+}
+```
 
 ### Create a Repository
 
-    <?php
-    
-    use Prettus\Repository\Eloquent\RepositoryBase;
-    
-    class PostRepository extends RepositoryBase {
-    
-        public function __construct(Post $model, PostValidator $validator)
-        {
-            parent::__construct($model, $validator);
-        }
-        
+```php
+use Prettus\Repository\Eloquent\RepositoryBase;
+
+class PostRepository extends RepositoryBase {
+
+    public function __construct(Post $model, PostValidator $validator)
+    {
+        parent::__construct($model, $validator);
     }
     
+}
+```
+
 ### Using the Repository in a Controller
 
-    <?php
-    
-    use \Prettus\Validator\Exceptions\ValidatorException;
-    
-    class PostsController extends BaseController {
-    
-        /**
-         * @var PostRepository
-         */
-        protected $repository;
-    
-        public function __construct(PostRepository $repository){
-            $this->repository = $repository;
-        }
-    
-    
-        public function index()
-        {
-            $posts = $this->repository->all();
-    
+```php
+
+use \Prettus\Validator\Exceptions\ValidatorException;
+
+class PostsController extends BaseController {
+
+    /**
+     * @var PostRepository
+     */
+    protected $repository;
+
+    public function __construct(PostRepository $repository){
+        $this->repository = $repository;
+    }
+
+
+    public function index()
+    {
+        $posts = $this->repository->all();
+
+        return Response::json(array(
+            'data'   =>$posts
+        ));
+    }
+
+
+    public function show($id)
+    {
+        $post = $this->repository->find($id);
+
+        return Response::json($post->toArray());
+    }
+
+    public function store()
+    {
+
+        try {
+
+            $post = $this->repository->create( Input::all() );
+
             return Response::json(array(
-                'data'   =>$posts
+                'message'=>'Post created',
+                'data'   =>$post->toArray()
             ));
-        }
-    
-    
-        public function show($id)
-        {
-            $post = $this->repository->find($id);
-    
-            return Response::json($post->toArray());
-        }
-    
-        public function store()
-        {
-    
-            try {
-    
-                $post = $this->repository->create( Input::all() );
-    
-                return Response::json(array(
-                    'message'=>'Post created',
-                    'data'   =>$post->toArray()
-                ));
-    
-            } catch (ValidatorException $e) {
-    
-                return Response::json(array(
-                    'error'   =>true,
-                    'message' =>$e->getMessage()
-                ));
-    
-            }
-        }
-    
-        public function update($id)
-        {
-    
-            try{
-    
-                $post = $this->repository->update( Input::all(), $id );
-    
-                return Response::json(array(
-                    'message'=>'Post created',
-                    'data'   =>$post->toArray()
-                ));
-    
-            }catch (ValidatorException $e){
-    
-                return Response::json(array(
-                    'error'   =>true,
-                    'message' =>$e->getMessage()
-                ));
-    
-            }
-    
-        }
-    
-        public function destroy($id){
-    
-            if( $this->repository->delete($id) )
-            {
-                return Response::json(array(
-                    'message' =>'Post deleted'
-                ));
-            }
-    
+
+        } catch (ValidatorException $e) {
+
+            return Response::json(array(
+                'error'   =>true,
+                'message' =>$e->getMessage()
+            ));
+
         }
     }
-    
+
+    public function update($id)
+    {
+
+        try{
+
+            $post = $this->repository->update( Input::all(), $id );
+
+            return Response::json(array(
+                'message'=>'Post created',
+                'data'   =>$post->toArray()
+            ));
+
+        }catch (ValidatorException $e){
+
+            return Response::json(array(
+                'error'   =>true,
+                'message' =>$e->getMessage()
+            ));
+
+        }
+
+    }
+
+    public function destroy($id){
+
+        if( $this->repository->delete($id) )
+        {
+            return Response::json(array(
+                'message' =>'Post deleted'
+            ));
+        }
+
+    }
+}
+```
+
 ## Filters
 
 The RepositoryRequestFilterableInterface interface comes with the method requestFilter(Request params). 
@@ -195,16 +199,17 @@ Examples:
 
 ### Applying a filter
 
-    public function index()
-    {
-        $posts = $this->repository->requestFilter()->all();
-    
-        return Response::json(array(
-            'data'   =>$posts
-        ));
-    }
-    
-    
+```php
+public function index()
+{
+    $posts = $this->repository->requestFilter()->all();
+
+    return Response::json(array(
+        'data'   =>$posts
+    ));
+}
+```
+
 # Author
 
 Anderson Andrade - <contato@andersonandra.de>
