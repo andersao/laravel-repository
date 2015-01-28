@@ -28,10 +28,10 @@ Add to app/config/app.php service provider array:
 
 ### RepositoryInterface
 
-- find($id, $columns = array('*'))
-- findByField($field, $value, $columns = array('*'))
+- find($id, $columns = ['*'])
+- findByField($field, $value, $columns = ['*'])
 - all($columns = array('*'))
-- paginate($limit = null, $columns = array('*'))
+- paginate($limit = null, $columns = ['*'])
 - create(array $attributes)
 - update(array $attributes, $id)
 - delete($id)
@@ -108,9 +108,9 @@ class PostsController extends BaseController {
     {
         $posts = $this->repository->all();
 
-        return Response::json(array(
+        return Response::json([
             'data'   =>$posts
-        ));
+        ]);
     }
 
 
@@ -128,17 +128,17 @@ class PostsController extends BaseController {
 
             $post = $this->repository->create( Input::all() );
 
-            return Response::json(array(
+            return Response::json([
                 'message'=>'Post created',
                 'data'   =>$post->toArray()
-            ));
+            ]);
 
         } catch (ValidatorException $e) {
 
-            return Response::json(array(
+            return Response::json([
                 'error'   =>true,
                 'message' =>$e->getMessage()
-            ));
+            ]);
 
         }
     }
@@ -150,17 +150,17 @@ class PostsController extends BaseController {
 
             $post = $this->repository->update( Input::all(), $id );
 
-            return Response::json(array(
+            return Response::json([
                 'message'=>'Post created',
                 'data'   =>$post->toArray()
-            ));
+            ]);
 
         }catch (ValidatorException $e){
 
-            return Response::json(array(
+            return Response::json([
                 'error'   =>true,
                 'message' =>$e->getMessage()
-            ));
+            ]);
 
         }
 
@@ -170,9 +170,9 @@ class PostsController extends BaseController {
 
         if( $this->repository->delete($id) )
         {
-            return Response::json(array(
+            return Response::json([
                 'message' =>'Post deleted'
-            ));
+            ]);
         }
 
     }
@@ -204,9 +204,9 @@ public function index()
 {
     $posts = $this->repository->requestFilter()->all();
 
-    return Response::json(array(
+    return Response::json([
         'data'   =>$posts
-    ));
+    ]);
 }
 ```
 
