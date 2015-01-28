@@ -9,7 +9,7 @@ Laravel Repositories is used to abstract the data layer, making our application 
 
 ## Installation
 
-Add this line "prettus/laravel-repository": "dev-master" in your composer.json.
+Add this line "prettus/laravel-repository": "1.0.*" in your composer.json.
  
     "require": {
         "prettus/laravel-repository": "1.0.*"
@@ -183,15 +183,15 @@ The default parameters are:
 
 - search ( Value to be searched by the repository )
 - searchFields ( Fields to be searched in )
-- filter ( Returned fields? )
+- filter ( Returned fields )
 - orderBy
 - sortedBy 
 
-Exemplo de utilização:
+Examples:
 
-- ?search=Lorem&orderBy=name
-- ?search=Lorem&searchFields=name:like;email:=
-- ?filter=name,email
+- http://server.local?search=Lorem&orderBy=name
+- http://server.local?search=Lorem&searchFields=name:like;email:=
+- http://server.local?filter=name;email
 
 ### Applying a filter
 
