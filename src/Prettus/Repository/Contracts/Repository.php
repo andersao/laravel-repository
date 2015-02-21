@@ -1,28 +1,28 @@
 <?php namespace Prettus\Repository\Contracts;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * Interface RepositoryInterface
+ * Interface Repository
  * @package Prettus\Repository\Contracts
  */
-interface RepositoryInterface {
+interface Repository {
 
     /**
      * Reset internal Query
      *
      * @return $this
      */
-    public function resetScope();
+    public function scopeReset();
 
     /**
      * Find data by id
      *
      * @param $id
      * @param array $columns
-     * @return Model|null
+     * @return Model|Collection
      */
     public function find($id, $columns = array('*'));
 
@@ -32,7 +32,7 @@ interface RepositoryInterface {
      * @param $field
      * @param $value
      * @param array $columns
-     * @return Model|null
+     * @return Model|Collection
      */
     public function findByField($field, $value, $columns = array('*'));
 
@@ -78,9 +78,55 @@ interface RepositoryInterface {
     public function delete($id);
 
     /**
+     * Load relations
+     *
+     * @param array $relations
+     * @return $this
+     */
+    public function with(array $relations);
+
+
+    /**
      * Get repository model
      *
      * @return Model
      */
     public function getModel();
+
+    /**
+     * Push Criteria for filter the query
+     *
+     * @param Criteria $criteria
+     * @return mixed
+     */
+    public function pushCriteria(Criteria $criteria);
+
+    /**
+     * Get Collection of Criteria
+     *
+     * @return Collection
+     */
+    public function getCriteria();
+
+    /**
+     * Find data by Criteria
+     *
+     * @param Criteria $criteria
+     * @return mixed
+     */
+    public function getByCriteria(Criteria $criteria);
+
+    /**
+     * Skip Criteria
+     *
+     * @return $this
+     */
+    public function skipCriteria();
+
+    /**
+     * Get Searchable Fields
+     *
+     * @return array
+     */
+    public function getFieldsSearchable();
 }

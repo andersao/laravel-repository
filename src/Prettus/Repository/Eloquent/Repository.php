@@ -1,55 +1,50 @@
 <?php namespace Prettus\Repository\Eloquent;
 
 use \Config;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
-use Prettus\Repository\Contracts\RepositoryInterface;
-use Prettus\Repository\Contracts\RepositoryRelationshipInterface;
-use Prettus\Repository\Contracts\RepositoryRequestFilterableInterface;
-use Prettus\Repository\Contracts\RepositorySortableInterface;
-use Prettus\Validator\Contracts\ValidatorInterface;
-use Prettus\Validator\Exceptions\ValidatorException;
+use Prettus\Repository\Contracts\Repository as RepositoryInterface;
+use Prettus\Repository\Contracts\Criteria;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * Class Repository
- * @package Prettus\Repository\Eloquent
+ * @package Prettus\Repository\Contracts
  */
-abstract class Repository implements RepositoryInterface, RepositoryRequestFilterableInterface, RepositoryRelationshipInterface, RepositorySortableInterface {
+class Repository implements RepositoryInterface {
+
+    /**
+     * Collection of Criteria
+     *
+     * @var Collection
+     */
+    protected $criteria;
 
     /**
      * @var Model
      */
-    protected $model = null;
+    protected $model;
 
     /**
-     * @var ValidatorInterface
-     */
-    protected $validator = null;
-
-    /**
-     * @var Model
+     * @var $query
      */
     protected $query;
 
     /**
      * @var array
      */
-    protected $repositoryFieldsSearchable;
-
-    public function __construct(Model $model, ValidatorInterface $validator = null){
-        $this->model     = $model;
-        $this->validator = $validator;
-        $this->resetScope();
-    }
+    protected $fieldSearchable = array();
 
     /**
-     * Call the boot repository
-     *
+     * @var bool
      */
-    protected function boot()
-    {
+    protected $skipCriteria = false;
+
+    public function __construct(Model $model){
+        $this->model = $model;
+        $this->criteria = new Collection();
+        $this->boot();
+        $this->scopeReset();
     }
 
     /**
@@ -57,22 +52,28 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
      *
      * @return $this
      */
-    public function resetScope()
+    public function scopeReset()
     {
-        $this->query = $this->model;
-        $this->boot();
+        $this->query =  $this->model;
+        $this->skipCriteria(false);
         return $this;
     }
+
+    /**
+     *
+     */
+    public function boot(){}
 
     /**
      * Find data by id
      *
      * @param $id
      * @param array $columns
-     * @return Model|null
+     * @return Model|Collection
      */
     public function find($id, $columns = array('*'))
     {
+        $this->applyCriteria();
         return $this->query->find($id, $columns);
     }
 
@@ -82,10 +83,11 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
      * @param $field
      * @param $value
      * @param array $columns
-     * @return Model|null
+     * @return Model|Collection
      */
     public function findByField($field, $value, $columns = array('*'))
     {
+        $this->applyCriteria();
         return $this->query->where($field,'=',$value)->first();
     }
 
@@ -97,6 +99,8 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
      */
     public function all($columns = array('*'))
     {
+        $this->applyCriteria();
+
         if( $this->query instanceof \Illuminate\Database\Eloquent\Builder ){
             return $this->query->get($columns);
         }
@@ -112,70 +116,46 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
      */
     public function paginate($limit = null, $columns = array('*'))
     {
-        return $this->query->paginate($limit);
+        $this->applyCriteria();
+        $limit = is_null($limit) ? Config::get('repository.pagination.limit', 15) : $limit;
+        return $this->query->paginate($limit, $columns);
     }
 
     /**
      * Save a new entity in repository
      *
-     * @throws ValidatorException
      * @param array $attributes
      * @return Model
      */
     public function create(array $attributes)
     {
-        if( !is_null($this->validator) )
-        {
-            $this->validator->with($attributes)
-                ->passesOrFail( ValidatorInterface::RULE_CREATE );
-        }
-
         return $this->query->create($attributes);
     }
 
     /**
      * Update a entity in repository by id
      *
-     * @throws ValidatorException
      * @param array $attributes
      * @param $id
      * @return Model
      */
     public function update(array $attributes, $id)
     {
-        if( !is_null($this->validator) )
-        {
-            $this->validator->with($attributes)
-                ->setId($id)
-                ->passesOrFail( ValidatorInterface::RULE_UPDATE );
-        }
-
         $model = $this->find($id);
         $model->fill($attributes);
-        $model->save();
-
-        return $model;
+        return $model->save();
     }
 
     /**
      * Delete a entity in repository by id
      *
      * @param $id
-     * @return bool
+     * @return int
      */
     public function delete($id)
     {
-        return (bool) $this->query->destroy($id);
-    }
-
-    /**
-     * Get repository model
-     *
-     * @return Model
-     */
-    public function getModel()
-    {
-        return $this->model;
+        $model = $this->find($id);
+        return $model->delete();
     }
 
     /**
@@ -191,171 +171,85 @@ abstract class Repository implements RepositoryInterface, RepositoryRequestFilte
     }
 
     /**
-     * Order results by field and sorter
+     * Get repository model
      *
-     * @param $field
-     * @param string $sort
-     * @return $this
+     * @return Model
      */
-    public function orderBy($field, $sort = 'ASC')
+    public function getModel()
     {
-        $this->query = $this->query->orderBy($field, $sort);
+        return $this->model;
+    }
+
+    /**
+     * Push Criteria for filter the query
+     *
+     * @param Criteria $criteria
+     * @return mixed
+     */
+    public function pushCriteria(Criteria $criteria)
+    {
+        $this->criteria->push($criteria);
         return $this;
     }
 
     /**
-     * Order results by field and ascending order
+     * Get Collection of Criteria
      *
-     * @param $field
-     * @return $this
+     * @return Collection
      */
-    public function orderByAsc($field)
-    {
-        return $this->orderBy($field,'ASC');
+    public function getCriteria(){
+        return $this->criteria;
     }
 
     /**
-     * Order results by field and descending  order
+     * Find data by Criteria
      *
-     * @param $field
-     * @return $this
+     * @param Criteria $criteria
+     * @return mixed
      */
-    public function orderByDesc($field)
+    public function getByCriteria(Criteria $criteria)
     {
-        return $this->orderBy($field,'DESC');
+        $this->query = $criteria->apply($this->query, $this);
+        return $this->query->get();
     }
 
     /**
-     * Apply filter from the request
+     * Skip Criteria
      *
-     * @param Request $request
      * @return $this
      */
-    public function requestFilter(Request $request = null){
+    public function skipCriteria($status = true){
+        $this->skipCriteria = $status;
+        return $this;
+    }
 
-        if( is_null($request) ){
-            $request = app('Illuminate\Http\Request');
-        }
+    /**
+     * Apply criteria in current Query
+     *
+     * @return $this
+     */
+    protected function applyCriteria(){
 
-        $search         = $request->get( Config::get('prettus-repository::config.filter.params.search','search') , null);
-        $searchFields   = $request->get( Config::get('prettus-repository::config.filter.params.searchFields','searchFields') , null);
-        $filter         = $request->get( Config::get('prettus-repository::config.filter.params.filter','filter') , null);
-        $orderBy        = $request->get( Config::get('prettus-repository::config.filter.params.orderBy','orderBy') , null);
-        $sortedBy       = $request->get( Config::get('prettus-repository::config.filter.params.sortedBy','sortedBy') , 'asc');
-        $sortedBy       = !empty($sortedBy) ? $sortedBy : 'asc';
+        if( $this->skipCriteria === true )
+            return  $this;
 
-        if( $search && is_array($this->repositoryFieldsSearchable) && count($this->repositoryFieldsSearchable) ){
+        $criteria = $this->getCriteria();
 
-            $searchFields = is_array($searchFields) || is_null($searchFields) ? $searchFields : array($searchFields);
-            $fields       = $this->parserFieldsSearch($this->repositoryFieldsSearchable, $searchFields);
-            $isFirstField = true;
-
-            $_searchParams  = explode(';', $search);
-            $searchData     = array();
-            $searchDataFields = array();
-            $queryForceAndWhere = false;
-
-            if( is_array($_searchParams) ){
-                foreach($_searchParams as $_search){
-                    $_data = explode(':', $_search);
-                    if( count($_data) == 2 ){
-                        $queryForceAndWhere = true;
-                        $searchData[$_data[0]] = $_data[1];
-                        $searchDataFields[]    = $_data[0];
-                    }else{
-                        $searchData[] = $_search;
-                    }
-                }
-
-                if( count($searchDataFields) ){
-                    $fields  = $this->parserFieldsSearch($fields, $searchDataFields);
-                }
+        foreach($criteria as $c){
+            if( $c instanceof Criteria ){
+                $this->query = $c->apply($this->query, $this);
             }
-
-            foreach($fields as $field=>$condition){
-
-                if(is_numeric($field)){
-                    $field = $condition;
-                    $condition = "=";
-                }
-
-                $condition  = trim(strtolower($condition));
-
-                if( isset($searchData[$field]) ){
-                    $value = $condition == "like" ? "%{$searchData[$field]}%" : $searchData[$field];
-                }else{
-                    $value = $condition == "like" ? "%{$search}%" : $search;
-                }
-
-                if( $isFirstField || $queryForceAndWhere ){
-                    $this->query = $this->query->where($field,$condition,$value);
-                    $isFirstField = false;
-                }else{
-                    $this->query = $this->query->orWhere($field,$condition,$value);
-                }
-            }
-
-        }
-
-        if( $orderBy && !empty($orderBy) ){
-            $this->query = $this->query->orderBy($orderBy, $sortedBy);
-        }
-
-        if( $filter && !empty($filter) ){
-
-            if( is_string($filter) ){
-                $filter = explode(';', $filter);
-            }
-
-            $this->query = $this->query->select($filter);
         }
 
         return $this;
     }
 
     /**
-     * @param array $fields
-     * @param array $searchFields
+     * Get Searchable Fields
+     *
      * @return array
-     * @throws \Exception
      */
-    protected function parserFieldsSearch(array $fields = array(), array $searchFields =  null){
-
-        if( !is_null($searchFields) && count($searchFields) ){
-
-            $acceptedConditions = Config::get('prettus-repository::config.filter.acceptedConditions', array('=','like') );
-            $originalFields = $fields;
-            $fields = [];
-
-            foreach($originalFields as $field=>$condition){
-
-                if(is_numeric($field)){
-                    $field = $condition;
-                    $condition = "=";
-                }
-
-                $_searchFieldIndex = array_search($field, $searchFields);
-                $_searchField      = $searchFields[$_searchFieldIndex];
-                $_searchFieldParts = explode(':', $_searchField);
-
-                if( count($_searchFieldParts) == 2 ){
-                    if( in_array($_searchFieldParts[1],$acceptedConditions) ){
-                        $field     = $_searchFieldParts[0];
-                        $condition = $_searchFieldParts[1];
-                        $searchFields[$_searchFieldIndex] = $field;
-                    }
-                }
-
-                if( in_array($field, $searchFields) ){
-                    $fields[$field] = $condition;
-                }
-            }
-
-            if( count($fields) == 0 ){
-                throw new \Exception( trans('prettus-repository::repository.fields_not_accepted', array('fields'=>implode(',', $searchFields))) );
-            }
-        }
-
-        return $fields;
+    public function getFieldsSearchable(){
+        return $this->fieldSearchable;
     }
 }
