@@ -1,3 +1,5 @@
+###This package is abandoned and no longer maintained. The author suggests using the https://github.com/andersao/l5-repository package instead.
+
 # Laravel 4 - Repositories
 
 [![Build Status](https://travis-ci.org/andersao/laravel-repository.svg)](https://travis-ci.org/andersao/laravel-repository.svg)
