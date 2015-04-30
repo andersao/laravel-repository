@@ -252,4 +252,10 @@ class Repository implements RepositoryInterface {
     public function getFieldsSearchable(){
         return $this->fieldSearchable;
     }
+
+    
+    public function first()
+    {
+        $this->query->first();
+    }
 }
