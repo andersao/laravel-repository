@@ -45,34 +45,37 @@ class RequestCriteria implements Criteria {
             $searchData         = array();
             $queryForceAndWhere = false;
 
-            foreach($fields as $field=>$condition)
+            $query = $query->where(function ($query) use ($fields, $searchData, $search, $isFirstField, $queryForceAndWhere)
             {
-                if(is_numeric($field)){
-                    $field = $condition;
-                    $condition = "=";
-                }
+                foreach($fields as $field=>$condition)
+                {
+                    if(is_numeric($field)){
+                        $field = $condition;
+                        $condition = "=";
+                    }
 
-                $condition  = trim(strtolower($condition));
+                    $condition  = trim(strtolower($condition));
 
-                if( isset($searchData[$field]) )
-                {
-                    $value = $condition == "like" ? "%{$searchData[$field]}%" : $searchData[$field];
-                }
-                else
-                {
-                    $value = $condition == "like" ? "%{$search}%" : $search;
-                }
+                    if( isset($searchData[$field]) )
+                    {
+                        $value = $condition == "like" ? "%{$searchData[$field]}%" : $searchData[$field];
+                    }
+                    else
+                    {
+                        $value = $condition == "like" ? "%{$search}%" : $search;
+                    }
 
-                if( $isFirstField || $queryForceAndWhere )
-                {
-                    $query = $query->where($field,$condition,$value);
-                    $isFirstField = false;
+                    if( $isFirstField || $queryForceAndWhere )
+                    {
+                        $query = $query->where($field,$condition,$value);
+                        $isFirstField = false;
+                    }
+                    else
+                    {
+                        $query = $query->orWhere($field,$condition,$value);
+                    }
                 }
-                else
-                {
-                    $query = $query->orWhere($field,$condition,$value);
-                }
-            }
+            });
         }
 
         if( isset($orderBy) && !empty($orderBy) )
