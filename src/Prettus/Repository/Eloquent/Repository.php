@@ -1,6 +1,7 @@
 <?php namespace Prettus\Repository\Eloquent;
 
 use \Config;
+use Illuminate\Database\Eloquent\SoftDeletingTrait;
 use Illuminate\Pagination\Paginator;
 use Prettus\Repository\Contracts\Repository as RepositoryInterface;
 use Prettus\Repository\Contracts\Criteria;
@@ -31,6 +32,16 @@ class Repository implements RepositoryInterface {
     protected $query;
 
     /**
+     * @var bool
+     */
+    protected $isSoftDelete = false;
+
+    /**
+     * @var string
+     */
+    protected $deletedAtColumn = null;
+
+    /**
      * @var array
      */
     protected $fieldSearchable = array();
@@ -41,7 +52,14 @@ class Repository implements RepositoryInterface {
     protected $skipCriteria = false;
 
     public function __construct(Model $model){
-        $this->model = $model;
+        $this->model    = $model;
+
+        if( method_exists($model,'trashed') )
+        {
+            $this->isSoftDelete = true;
+            $this->deletedAtColumn = $this->model->getDeletedAtColumn();
+        }
+
         $this->criteria = new Collection();
         $this->boot();
         $this->scopeReset();
@@ -252,4 +270,20 @@ class Repository implements RepositoryInterface {
     public function getFieldsSearchable(){
         return $this->fieldSearchable;
     }
+
+    /**
+     * @return boolean
+     */
+    public function isSoftDelete(){
+        return $this->isSoftDelete;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeletedAtColumn(){
+        return $this->deletedAtColumn;
+    }
+
+
 }

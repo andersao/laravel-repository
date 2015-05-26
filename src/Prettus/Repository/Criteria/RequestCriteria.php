@@ -88,6 +88,11 @@ class RequestCriteria implements Criteria {
             $query = $query->select($filter);
         }
 
+        if( $repository->isSoftDelete() )
+        {
+            $query = $query->whereNull($repository->getDeletedAtColumn());
+        }
+
         return $query;
     }
 

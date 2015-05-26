@@ -129,4 +129,14 @@ interface Repository {
      * @return array
      */
     public function getFieldsSearchable();
+
+    /**
+     * @return boolean
+     */
+    public function isSoftDelete();
+
+    /**
+     * @return string
+     */
+    public function getDeletedAtColumn();
 }
